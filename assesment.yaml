@@ -1,0 +1,135 @@
+openapi: 3.0.0
+info:
+  title: Torneo de Videojuegos API
+  version: 1.0.0
+servers:
+  - url: https://api.example.com/v1
+paths:
+  /tournaments:
+    get:
+      summary: Obtener la lista de torneos disponibles
+      responses:
+        '200':
+          description: Lista de torneos obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tournament'
+        '500':
+          description: Error al obtener la lista de torneos
+    post:
+      summary: Crear un nuevo torneo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewTournament'
+      responses:
+        '201':
+          description: Torneo creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '400':
+          description: Error al crear el torneo
+  /tournaments/{tournamentId}:
+    get:
+      summary: Obtener información detallada de un torneo
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          description: ID del torneo
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Información del torneo obtenida correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '404':
+          description: Torneo no encontrado
+  /tournaments/{tournamentId}/participants:
+    get:
+      summary: Obtener la lista de participantes de un torneo
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          description: ID del torneo
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de participantes obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Participant'
+        '404':
+          description: Torneo no encontrado
+components:
+  schemas:
+    Tournament:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID del torneo
+        name:
+          type: string
+          description: Nombre del torneo
+        category:
+          type: string
+          description: Categoría del torneo
+        organizer:
+          type: string
+          description: Organizador del torneo
+        capacity:
+          type: integer
+          description: Capacidad máxima de participantes
+        participants:
+          type: array
+          description: Lista de participantes inscritos en el torneo
+          items:
+            $ref: '#/components/schemas/Participant'
+    NewTournament:
+      type: object
+      required:
+        - name
+        - category
+        - organizer
+        - capacity
+      properties:
+        name:
+          type: string
+          description: Nombre del torneo
+        category:
+          type: string
+          description: Categoría del torneo
+        organizer:
+          type: string
+          description: Organizador del torneo
+        capacity:
+          type: integer
+          description: Capacidad máxima de participantes
+    Participant:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID del participante
+        name:
+          type: string
+          description: Nombre del participante
+        email:
+          type: string
+          description: Correo electrónico del participante
