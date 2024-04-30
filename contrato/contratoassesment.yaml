@@ -1,0 +1,257 @@
+openapi: 3.0.0
+info:
+  title: Tournament Videogames
+  version: 1.0.0
+servers:
+  - url: https://bhnk48ut91.execute-api.us-east-1.amazonaws.com/v1
+paths:
+  /tournaments/{tournamentId}:
+    get:
+      summary: Obtener un torneo por su ID
+      parameters:
+        - in: path
+          name: tournamentId
+          required: true
+          description: ID del torneo a buscar
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Torneo obtenido correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '404':
+          description: Torneo no encontrado
+        '500':
+          description: Error interno del servidor
+    put:
+      summary: Actualizar un torneo existente por su ID
+      parameters:
+        - in: path
+          name: tournamentId
+          required: true
+          description: ID del torneo a actualizar
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewTournament'
+      responses:
+        '200':
+          description: Torneo actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '404':
+          description: Torneo no encontrado
+        '500':
+          description: Error interno del servidor
+    delete:
+      summary: Eliminar un torneo existente por su ID
+      parameters:
+        - in: path
+          name: tournamentId
+          required: true
+          description: ID del torneo a eliminar
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Torneo eliminado exitosamente
+        '404':
+          description: Torneo no encontrado
+        '500':
+          description: Error interno del servidor
+  /tournaments:
+    get:
+      summary: Obtener la lista de torneos disponibles
+      responses:
+        '200':
+          description: Lista de torneos obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tournament'
+        '500':
+          description: Error al obtener la lista de torneos
+    post:
+      summary: Crear un nuevo torneo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewTournament'
+      responses:
+        '201':
+          description: Torneo creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '400':
+          description: Error al crear el torneo
+  /tournaments/{tournamentId}/sales:
+    post:
+      summary: Realizar la venta de un ticket para un torneo
+      parameters:
+        - in: path
+          name: tournamentId
+          required: true
+          description: ID del torneo a vender
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SellTicketRequest'
+      responses:
+        '200':
+          description: Venta del ticket exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellTicketResponse'
+        '400':
+          description: Error en la solicitud
+        '404':
+          description: Torneo no encontrado
+        '500':
+          description: Error interno del servidor
+components:
+  schemas:
+    Tournament:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID del torneo
+        name:
+          type: string
+          description: Nombre del torneo
+        capacity:
+          type: integer
+          description: Capacidad máxima de participantes
+        participants:
+          type: array
+          description: Lista de participantes inscritos en el torneo
+          items:
+            $ref: '#/components/schemas/Participant'
+    NewTournament:
+      type: object
+      required:
+        - name
+        - category
+        - gameType
+        - organizer
+        - capacity
+      properties:
+        name:
+          type: string
+          description: Nombre del torneo
+        category:
+          $ref: '#/components/schemas/Category'
+        gameType:
+          $ref: '#/components/schemas/GameType'
+        organizer:
+          type: string
+          description: Organizador del torneo
+        capacity:
+          type: integer
+          description: Capacidad máxima de participantes
+    Participant:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID del participante
+        name:
+          type: string
+          description: Nombre del participante
+        email:
+          type: string
+          description: Correo electrónico del participante
+    Category:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Código de la categoría
+        description:
+          type: string
+          description: Descripción de la categoría
+        alias:
+          type: string
+          description: Alias de la categoría
+    GameType:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Código del tipo de juego
+        fullName:
+          type: string
+          description: Nombre completo del tipo de juego
+        playerCount:
+          type: integer
+          description: Cantidad de jugadores permitidos
+    SellTicketRequest:
+      type: object
+      required:
+        - buyerName
+        - buyerEmail
+        - paymentMethod
+      properties:
+        buyerName:
+          type: string
+          description: Nombre del comprador del ticket
+        buyerEmail:
+          type: string
+          format: email
+          description: Correo electrónico del comprador del ticket
+        paymentMethod:
+          type: string
+          description: Método de pago utilizado para la compra del ticket
+    SellTicketResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicador de éxito de la venta del ticket
+        message:
+          type: string
+          description: Mensaje de estado de la venta del ticket
+        ticket:
+          $ref: '#/components/schemas/Ticket'
+    Ticket:
+      type: object
+      properties:
+        tournamentId:
+          type: string
+          description: ID del torneo para el cual se vendió el ticket
+        buyerName:
+          type: string
+          description: Nombre del comprador del ticket
+        buyerEmail:
+          type: string
+          format: email
+          description: Correo electrónico del comprador del ticket
+        paymentMethod:
+          type: string
+          description: Método de pago utilizado para la compra del ticket
+        price:
+          type: number
+          description: Precio del ticket
+        uniqueCode:
+          type: string
+          description: Código único generado para el ticket
